@@ -23,22 +23,9 @@ def connect_auth_db():
         CREATE TABLE IF NOT EXISTS workers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'pending'
+            password_hash TEXT NOT NULL
         )
     """)
-
-    columns = {
-        row[1] for row in connection.execute(
-            "PRAGMA table_info(workers)"
-        ).fetchall()
-    }
-
-    if "status" not in columns:
-        connection.execute("""
-            ALTER TABLE workers
-            ADD COLUMN status TEXT NOT NULL DEFAULT 'pending'
-        """)
 
     return connection
 
@@ -58,8 +45,8 @@ def create_worker(username, password):
         with connect_auth_db() as connection:
             connection.execute(
                 """
-                INSERT INTO workers (username, password_hash, status)
-                VALUES (?, ?, 'pending')
+                INSERT INTO workers (username, password_hash)
+                VALUES (?, ?)
                 """,
                 (username, hashed_password),
             )
@@ -75,7 +62,7 @@ def authenticate_worker(username, password):
     with connect_auth_db() as connection:
         worker = connection.execute(
             """
-            SELECT id, username, password_hash, status
+            SELECT id, username, password_hash
             FROM workers
             WHERE username = ?
             """,
@@ -88,40 +75,7 @@ def authenticate_worker(username, password):
     if not password_hash.verify(password, worker[2]):
         return None
 
-    if worker[3] != "approved":
-        return None
-
-    return {"id": worker[0], "username": worker[1]}
-
-
-def list_pending_workers():
-    with connect_auth_db() as connection:
-        workers = connection.execute(
-            """
-            SELECT username
-            FROM workers
-            WHERE status = 'pending'
-            ORDER BY username
-            """
-        ).fetchall()
-
-    return [{"username": worker[0]} for worker in workers]
-
-
-def approve_worker(username):
-    username = username.strip().lower()
-
-    with connect_auth_db() as connection:
-        cursor = connection.execute(
-            """
-            UPDATE workers
-            SET status = 'approved'
-            WHERE username = ? AND status = 'pending'
-            """,
-            (username,),
-        )
-
-        if cursor.rowcount == 0:
-            raise ValueError("Pending worker account not found.")
-
-    return True
+    return {
+        "id": worker[0],
+        "username": worker[1]
+    }

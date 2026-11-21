@@ -90,7 +90,7 @@ async def signup(data: SignupRequest):
 
         return {
             "success": True,
-            "message": "Account request submitted. Please wait for administrator approval."
+            "message": "Account created successfully! You can now log in."
         }
 
     except ValueError as error:
@@ -108,7 +108,7 @@ async def login(data: LoginRequest, request: Request):
     if worker is None:
         raise HTTPException(
             status_code=401,
-            detail="Invalid username or password, or account awaiting approval."
+            detail="Invalid username or password."
         )
 
     request.session.clear()
