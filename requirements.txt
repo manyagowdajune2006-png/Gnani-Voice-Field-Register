@@ -6,3 +6,4 @@ google-genai
 cryptography
 pytest
 httpx
+pwdlib[argon2]
