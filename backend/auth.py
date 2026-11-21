@@ -37,7 +37,7 @@ def connect_auth_db():
     if "status" not in columns:
         connection.execute("""
             ALTER TABLE workers
-            ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'
+            ADD COLUMN status TEXT NOT NULL DEFAULT 'pending'
         """)
 
     return connection
