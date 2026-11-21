@@ -1,84 +1,193 @@
-﻿* {
-    box-sizing: border-box;
+﻿
+/* ==================================
+   LOGIN AND SIGN UP DESIGN
+================================== */
+
+#loginScreen {
+    width: 100%;
+    max-width: 440px;
+    margin: 7vh auto;
+    padding: 35px;
+    background: #ffffff;
+    border: 1px solid #e1efeb;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(20, 100, 85, 0.12);
 }
 
+#loginScreen h1,
+#loginScreen h2 {
+    text-align: center;
+    color: #126b5b;
+    margin-bottom: 12px;
+}
+
+#loginScreen p {
+    text-align: center;
+    color: #71827e;
+    line-height: 1.6;
+}
+
+#loginScreen label {
+    display: block;
+    color: #294b43;
+    font-size: 14px;
+    margin: 15px 0 8px;
+}
+
+#loginScreen input {
+    width: 100%;
+    padding: 14px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #d6e4df;
+    border-radius: 10px;
+    background: #f8fbfa;
+    font-size: 15px;
+    outline: none;
+}
+
+#loginScreen input:focus {
+    border-color: #168875;
+    box-shadow: 0 0 0 3px rgba(22, 136, 117, 0.12);
+}
+
+#loginScreen button {
+    padding: 13px 18px;
+    background: #168875;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#loginScreen button:hover {
+    background: #0d594c;
+}
+
+#loginScreen #loginBtn,
+#loginScreen #signupBtn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 15px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+#loginScreen button:disabled {
+    background: #999999;
+    cursor: not-allowed;
+}
+
+#loginStatus,
+#signupStatus {
+    color: #b54747;
+    font-size: 14px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    #loginScreen {
+        margin: 4vh auto;
+        padding: 25px 20px;
+    }
+}
+
+/* ==================================
+   DASHBOARD DESIGN
+================================== */
+
 body {
-    margin: 0;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    background: #f1f5f4;
+    background: #f1f8f6;
     color: #183b35;
+    font-family: Arial, sans-serif;
 }
 
 .app {
-    max-width: 750px;
+    max-width: 1000px;
     margin: 30px auto;
 }
 
-header {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
 header h1 {
-    color: #123b35;
+    color: #126b5b;
 }
 
 .panel {
-    background: white;
-    padding: 22px;
-    margin-bottom: 20px;
-    border-radius: 12px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+    background: #ffffff;
+    border: 1px solid #e1efeb;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 25px rgba(20, 100, 85, 0.08);
+}
+
+.panel h2,
+.panel h3 {
+    color: #126b5b;
 }
 
 label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
+    color: #294b43;
 }
 
-select, button {
+select,
+input,
+textarea {
     padding: 12px;
-    margin: 6px 4px 6px 0;
-    border-radius: 7px;
-    font-size: 15px;
-}
-
-select {
-    border: 1px solid #aaa;
-    min-width: 150px;
+    border: 1px solid #d6e4df;
+    border-radius: 9px;
+    background: #f8fbfa;
+    color: #183b35;
 }
 
 button {
-    background: #176b58;
+    background: #168875;
     color: white;
     border: none;
+    border-radius: 9px;
+    padding: 12px 18px;
     cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #0d594c;
 }
 
 button:disabled {
-    background: #999;
+    background: #999999;
     cursor: not-allowed;
 }
 
 #conversation {
-    min-height: 100px;
-    padding: 12px;
-    background: #f5f8f7;
-    border-radius: 8px;
+    background: #f1f8f6;
+    border: 1px solid #e1efeb;
+    border-radius: 10px;
+    padding: 15px;
 }
 
 #visitDetails {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    background: #f8fbfa;
+    border: 1px solid #e1efeb;
+    border-radius: 10px;
+    padding: 15px;
 }
 
 #dangerStatus {
-    font-weight: bold;
     color: #9a5b00;
 }
 
 #status {
-    font-weight: bold;
+    color: #126b5b;
+}
+
+@media (max-width: 600px) {
+    .app {
+        margin: 15px auto;
+    }
+
+    .panel {
+        padding: 18px;
+    }
 }

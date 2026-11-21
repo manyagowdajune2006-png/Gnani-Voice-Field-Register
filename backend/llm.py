@@ -71,7 +71,7 @@ def _local_extract(text, form):
     patterns = {
         "village": r"\bvillage\s+(?:is\s+)?([A-Za-z][A-Za-z -]{1,40})",
         "household_id": r"\bhousehold\s+(?:id|number|no\.?)\s+(?:is\s+)?([A-Za-z0-9-]+)",
-        "person_name": r"\b(?:person|patient|beneficiary)\s+name\s+(?:is\s+)?([A-Za-z][A-Za-z ]{1,40})",
+        "person_name": r"\b(?:the\s+)?(?:person'?s|patient'?s|beneficiary'?s|person|patient|beneficiary)\s+name\s+(?:is\s+)?([A-Za-z][A-Za-z ]{0,40})",
         "age": r"\bage\s+(?:is\s+)?(\d{1,3})\b",
         "main_concern": r"\bmain concern\s+(?:is\s+)?(.+)",
     }

@@ -36,9 +36,10 @@ def get_api_key():
 async def open_prisma_connection(language="hi"):
     api_key = get_api_key()
 
+    # Updated: use exactly one locale
     language_code = (
         "en-IN" if language == "en"
-        else "hi-IN,en-IN"
+        else "hi-IN"
     )
 
     headers = {

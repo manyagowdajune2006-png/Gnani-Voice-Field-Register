@@ -1,48 +1,216 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#123b35">
+
     <title>Gnani Voice Field Register</title>
+
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/styles.css">
 </head>
+
 <body>
-    <main class="app">
+
+    <!-- Worker Authentication -->
+    <main class="app" id="loginScreen">
+
         <header>
             <h1>Gnani Voice Field Register</h1>
             <p>AI-powered voice assistance for field visits</p>
         </header>
 
         <section class="panel">
+
+            <!-- Login Form -->
+            <div id="loginSection">
+                <h2>Worker Login</h2>
+
+                <form id="loginForm">
+
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                    >
+
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button type="submit" id="loginBtn">
+                        Login
+                    </button>
+
+                    <p id="loginStatus" role="status"></p>
+                </form>
+
+                <p>
+                    Don't have an account?
+                    <button type="button" id="showSignupBtn">
+                        Sign Up
+                    </button>
+                </p>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div id="signupSection" hidden>
+
+                <h2>ASHA Worker Sign Up</h2>
+
+                <form id="signupForm">
+
+                    <label for="signupUsername">Create Username</label>
+                    <input
+                        type="text"
+                        id="signupUsername"
+                        name="username"
+                        placeholder="Choose a username"
+                        autocomplete="username"
+                        required
+                        minlength="3"
+                    >
+
+                    <label for="signupPassword">Create Password</label>
+                    <input
+                        type="password"
+                        id="signupPassword"
+                        name="password"
+                        placeholder="Create a password"
+                        autocomplete="new-password"
+                        required
+                        minlength="10"
+                    >
+
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        placeholder="Confirm your password"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button type="submit" id="signupBtn">
+                        Create Account
+                    </button>
+
+                    <p id="signupStatus" role="status"></p>
+
+                </form>
+
+                <p>
+                    Already have an account?
+                    <button type="button" id="showLoginBtn">
+                        Login
+                    </button>
+                </p>
+
+                <p>
+                    Your account will need administrator approval
+                    before you can log in.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Main Application -->
+    <main class="app" id="mainApp" hidden>
+
+        <header>
+            <h1>Gnani Voice Field Register</h1>
+            <p>AI-powered voice assistance for field visits</p>
+
+            <p>
+                Logged in as: <strong id="workerName"></strong>
+            </p>
+
+            <button id="logoutBtn" type="button">
+                Logout
+            </button>
+        </header>
+
+        <!-- Voice Controls -->
+        <section class="panel">
+            <h2>Voice Assistant</h2>
+
             <label for="language">Choose language</label>
+
             <select id="language">
                 <option value="en">English</option>
                 <option value="hi">Hindi</option>
             </select>
 
             <button id="connectBtn">Connect</button>
-            <button id="micBtn" disabled>Start speaking</button>
-            <button id="stopBtn" disabled>Stop</button>
+
+            <button id="micBtn" disabled>
+                Start speaking
+            </button>
+
+            <button id="stopBtn" disabled>
+                Stop
+            </button>
 
             <p id="status">Not connected</p>
         </section>
 
+        <!-- Conversation -->
         <section class="panel">
             <h2>Conversation</h2>
+
             <div id="conversation" aria-live="polite">
                 <p>Your conversation will appear here.</p>
             </div>
         </section>
 
+        <!-- Visit Details -->
         <section class="panel">
-            <h2>Visit details</h2>
+            <h2>Visit Details</h2>
+
             <pre id="visitDetails">No visit details yet.</pre>
-            <p id="dangerStatus">No safety alert.</p>
+
+            <p id="dangerStatus">
+                No safety alert.
+            </p>
         </section>
+
+        <!-- Visit History -->
+        <section class="panel">
+            <h2>Visit History</h2>
+
+            <p>
+                View your previously saved and confirmed visits.
+            </p>
+
+            <button id="historyBtn">
+                View Visit History
+            </button>
+
+            <div id="visitHistory">
+                <p>Click the button to view saved visits.</p>
+            </div>
+        </section>
+
     </main>
 
     <script src="/app.js"></script>
+
 </body>
 </html>

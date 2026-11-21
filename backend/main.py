@@ -1,13 +1,21 @@
-﻿import os
+﻿
+import os
 import json
 import base64
 import asyncio
-from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import (
+    FastAPI,
+    WebSocket,
+    WebSocketDisconnect,
+    Request,
+    HTTPException,
+)
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from backend.gnani_adapter import (
     open_prisma_connection,
@@ -16,14 +24,53 @@ from backend.gnani_adapter import (
     synthesize_speech,
 )
 from backend.dialogue import create_session, handle_turn
+from backend.db import read_confirmed_visits
+from backend.auth import authenticate_worker, create_worker
 
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
+SESSION_SECRET_KEY = os.getenv("SESSION_SECRET_KEY")
+
+if not SESSION_SECRET_KEY:
+    raise RuntimeError("SESSION_SECRET_KEY is missing from .env")
 
 app = FastAPI(title="Gnani Voice Field Register")
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET_KEY,
+    same_site="lax",
+    https_only=False,
+)
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class SignupRequest(BaseModel):
+    username: str
+    password: str
+
+
+def require_worker(request: Request):
+    worker_id = request.session.get("worker_id")
+
+    if not worker_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Please log in first."
+        )
+
+    return {
+        "id": worker_id,
+        "username": request.session.get("username")
+    }
+
 
 @app.get("/")
 async def home():
@@ -35,9 +82,85 @@ async def health():
     return {"status": "running"}
 
 
+# ASHA WORKER SIGN UP
+@app.post("/api/signup")
+async def signup(data: SignupRequest):
+    try:
+        create_worker(data.username, data.password)
+
+        return {
+            "success": True,
+            "message": "Account request submitted. Please wait for administrator approval."
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+
+# ASHA WORKER LOGIN
+@app.post("/api/login")
+async def login(data: LoginRequest, request: Request):
+    worker = authenticate_worker(data.username, data.password)
+
+    if worker is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password, or account awaiting approval."
+        )
+
+    request.session.clear()
+    request.session["worker_id"] = worker["id"]
+    request.session["username"] = worker["username"]
+
+    return {
+        "success": True,
+        "username": worker["username"]
+    }
+
+
+# LOGOUT
+@app.post("/api/logout")
+async def logout(request: Request):
+    request.session.clear()
+
+    return {
+        "success": True,
+        "message": "Logged out successfully."
+    }
+
+
+# CURRENT WORKER
+@app.get("/api/me")
+async def get_current_worker(request: Request):
+    worker = require_worker(request)
+
+    return {
+        "authenticated": True,
+        "username": worker["username"]
+    }
+
+
+# VISIT HISTORY
+@app.get("/api/visits")
+async def get_visit_history(request: Request):
+    require_worker(request)
+
+    visits = read_confirmed_visits()
+    return {"visits": visits}
+
+
+# VOICE ASSISTANT
 @app.websocket("/ws/voice")
 async def voice_websocket(client: WebSocket):
+
     await client.accept()
+
+    if not client.session.get("worker_id"):
+        await client.close(code=1008, reason="Please log in first.")
+        return
 
     stt = None
     session = None
@@ -56,6 +179,7 @@ async def voice_websocket(client: WebSocket):
             return
 
         language = start_message.get("language", "en")
+
         if language not in ("en", "hi"):
             language = "en"
 
@@ -80,7 +204,10 @@ async def voice_websocket(client: WebSocket):
                     await client.send_json({
                         "type": "error",
                         "code": "STT_ERROR",
-                        "message": event.get("message", "Speech recognition failed.")
+                        "message": event.get(
+                            "message",
+                            "Speech recognition failed."
+                        )
                     })
                     continue
 
@@ -99,7 +226,11 @@ async def voice_websocket(client: WebSocket):
 
                         for reply in replies:
                             if isinstance(reply, dict):
-                                reply_text = reply.get("text", "") if reply.get("type") == "say" else ""
+                                reply_text = (
+                                    reply.get("text", "")
+                                    if reply.get("type") == "say"
+                                    else ""
+                                )
                             else:
                                 reply_text = str(reply)
 
@@ -124,7 +255,9 @@ async def voice_websocket(client: WebSocket):
                             "type": "update",
                             "state": session.get("state"),
                             "form": session.get("form", {}),
-                            "danger_flag": bool(session.get("danger_flags")),
+                            "danger_flag": bool(
+                                session.get("danger_flags")
+                            ),
                             "follow_ups": session.get("follow_ups", [])
                         })
 
@@ -136,6 +269,7 @@ async def voice_websocket(client: WebSocket):
 
             if message_type == "audio":
                 audio_data = base64.b64decode(message.get("data", ""))
+
                 for offset in range(0, len(audio_data), 1024):
                     frame = audio_data[offset:offset + 1024]
 
@@ -180,5 +314,10 @@ app.mount("/", StaticFiles(directory=FRONTEND_DIR), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)
 
+    uvicorn.run(
+        "backend.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
